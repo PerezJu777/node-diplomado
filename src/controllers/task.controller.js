@@ -20,7 +20,7 @@ async function get(req, res) {
     const { userId } = req.user;
   try {
     const tasks = await Task.findAndCountAll({
-      attributes: ['id', 'name', 'done', 'userId'],
+      attributes: ['id', 'name', 'done'],
       order: [['id', 'DESC']],
       where: {
         userId

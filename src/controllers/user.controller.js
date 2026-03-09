@@ -3,6 +3,8 @@ import { Task } from "../models/task.js";
 import logger from "../logs/logger.js";
 import { Status } from "../constants/index.js";
 import { encriptar } from "../common/bycript.js";
+//import { validatePagination } from "../validators/user.paginacion.validate.js";
+import { Op } from "sequelize";
 
 async function create(req, res) {
   const { username, password } = req.body;
@@ -23,7 +25,7 @@ async function create(req, res) {
 async function get(_req, res) {
   try {
     const users = await User.findAndCountAll({
-      attributes: ['id', 'username', 'password', 'status'],
+      attributes: ['id', 'username', 'status'],
       order: [['id', 'DESC']],
       where: {
         status: Status.ACTIVE
@@ -44,7 +46,7 @@ async function find(req, res) {
   const { id } = req.params;
   try {
     const user = await User.findOne({
-      attributes: ['id', 'username', 'status'],
+      attributes: ['username', 'status'],
       where: { 
         id 
       },
@@ -151,6 +153,68 @@ const getTasks = async (req, res) => {
   }
 }
 
+export const getUsersPagination = async (req, res) => {
+    try {
+        // Los datos ya vienen limpios gracias al middleware
+        const { page, limit, search, orderBy, orderDir } = req.query;
+        const offset = (page - 1) * limit;
+
+        const { count, rows } = await User.findAndCountAll({
+            where: search ? { username: { [Op.iLike]: `%${search}%` } } : {},
+            attributes: ['id', 'username', 'status'],
+            order: [[orderBy, orderDir]],
+            limit: limit,
+            offset: offset
+        });
+
+        res.json({
+            total: count,
+            page: page,
+            pages: Math.ceil(count / limit),
+            data: rows
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Error interno al obtener la paginación' });
+    }
+};
+
+/*
+export const getUsersPagination = async (req, res) => {
+    try {
+        // VALIDACIÓN CON JOI
+        const { error, value } = paginationSchema.validate(req.query, { abortEarly: false });
+
+        if (error) {
+            return res.status(400).json({
+                message: 'Parámetros de consulta inválidos',
+                errors: error.details.map(d => d.message)
+            });
+        }
+
+        // Usamos 'value' que ya contiene los datos validados y con valores por defecto
+        const { page, limit, search, orderBy, orderDir } = value;
+        const offset = (page - 1) * limit;
+
+        const { count, rows } = await User.findAndCountAll({
+            where: search ? { username: { [Op.iLike]: `%${search}%` } } : {},
+            attributes: ['id', 'username', 'status'],
+            order: [[orderBy, orderDir]],
+            limit: limit,
+            offset: offset
+        });
+
+        res.json({
+            total: count,
+            page: page,
+            pages: Math.ceil(count / limit),
+            data: rows
+        });
+
+    } catch (err) {
+        res.status(500).json({ message: 'Error en el servidor' });
+    }
+};
+*/
 
 export default {
     create,
@@ -159,5 +223,5 @@ export default {
     update,
     activateInactivate,
     eliminar,
-    getTasks
+    getTasks,
 }
