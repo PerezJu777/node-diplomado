@@ -10,5 +10,11 @@ export const sequelize = new Sequelize(
         host: env.db_host,
         logging: console.log, //para ver las consultas SQL en consola   
         //logging: false,
+        dialectOptions: env.db_use_ssl === 'true' ? {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false // Permite conexiones SSL sin verificar el certificado
+            }
+        } : {}
     }
 );
