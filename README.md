@@ -1,2 +1,2 @@
-# node-diplomado
-Proyecto de Node.js
+# NODE DIPLOMADO
+Proyecto Final de Node.js
