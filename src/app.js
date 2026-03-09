@@ -18,7 +18,7 @@ app.use('/api/tasks/', authenticateToken, taskRoutes);
 app.use('/api/login/', authRoutes);
 
 app.get('/', (req, res) => {
-    res.send('Bienvenido a la API del proyecto final del diplomado de Node.js');
+    res.send('Bienvenido a la API del proyecto final de JUAN PEREZ para el diplomado de Node.js... Celular: 77390284');
 });
 
 export default app;
